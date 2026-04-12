@@ -1,20 +1,18 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useState } from 'react';
+import LoginScreen from './screens/LoginScreen';
+import { View, Text } from 'react-native';
 
 export default function App() {
+  const [user, setUser] = useState(null);
+
+  if (!user) {
+    return <LoginScreen onLoginSuccess={(userData) => setUser(userData)} />;
+  }
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <Text>¡Bienvenido, {user.username}!</Text>
+      <Text>Aquí irá el Mapa y el Rastreador GPS...</Text>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});

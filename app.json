@@ -13,17 +13,46 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.famaz.rastreopersonal",
+      "infoPlist": {
+        "UIBackgroundModes": [
+          "location",
+          "fetch"
+        ],
+        "NSLocationWhenInUseUsageDescription": "Necesitamos tu ubicación para mostrarte en el mapa en tiempo real.",
+        "NSLocationAlwaysUsageDescription": "Necesitamos rastrear tu ubicación incluso con la app cerrada para seguridad familiar.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "Tu ubicación se compartirá con tu grupo familiar en tiempo real."
+      }
     },
     "android": {
+      "package": "com.famaz.rastreopersonal",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION",
+        "FOREGROUND_SERVICE",
+        "FOREGROUND_SERVICE_LOCATION"
+      ]
     },
     "web": {
-      "favicon": "./assets/favicon.png"
-    }
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-secure-store",
+      "expo-router",
+      [
+        "expo-location",
+        {
+          "locationAlwaysPermission": "Permitir que la app rastree tu ubicación siempre."
+        }
+      ]
+    ]
   }
 }
