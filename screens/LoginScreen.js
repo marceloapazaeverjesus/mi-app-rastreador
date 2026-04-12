@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 
-const API_URL = "https://tu-proyecto-en-vercel.vercel.app/api"; // Cambiaremos esto al desplegar
+const API_URL = "https://mi-app-rastreador.vercel.app/api"; // Cambiaremos esto al desplegar
 
 export default function LoginScreen({ onLoginSuccess }) {
   const [username, setUsername] = useState('');
