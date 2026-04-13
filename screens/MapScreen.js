@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, Dimensions } from 'react-native';
-import MapView, { Marker, UrlTile } from 'react-native-maps'; // Usaremos UrlTile para OpenStreetMap
+import { StyleSheet, View, Dimensions, TouchableOpacity, Text, Alert } from 'react-native';
+import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps'; 
 import * as Location from 'expo-location';
+import * as SecureStore from 'expo-secure-store';
 
-export default function MapScreen({ user }) {
+export default function MapScreen({ user, onLogout }) {
   const [location, setLocation] = useState(null);
 
   useEffect(() => {
@@ -11,22 +12,25 @@ export default function MapScreen({ user }) {
   }, []);
 
   const startTracking = async () => {
-    // 1. Pedir permisos
+    // 1. Pedir permisos de ubicación
     let { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== 'granted') return;
+    if (status !== 'granted') {
+      Alert.alert("Permiso denegado", "Se requiere GPS para el rastreo en tiempo real.");
+      return;
+    }
 
-    // 2. Rastreo de alta precisión (cada 1 metro)
+    // 2. Suscribirse a cambios de ubicación (Cada 1 metro)
     await Location.watchPositionAsync(
       {
         accuracy: Location.Accuracy.BestForNavigation,
-        distanceInterval: 1, // <--- AQUÍ: Actualiza cada 1 metro
-        timeInterval: 5000,   // O cada 5 segundos si está quieto
+        distanceInterval: 1, // Actualiza cada 1 metro de movimiento
+        timeInterval: 5000,  
       },
       (newLocation) => {
         const { latitude, longitude } = newLocation.coords;
         setLocation(newLocation.coords);
         
-        // 3. Enviar a Vercel
+        // 3. Enviar coordenadas a Vercel
         sendLocationToServer(latitude, longitude);
       }
     );
@@ -34,7 +38,7 @@ export default function MapScreen({ user }) {
 
   const sendLocationToServer = async (lat, lng) => {
     try {
-      await fetch("https://mi-app-rastreo.vercel.app/api/location", {
+      const response = await fetch("https://mi-app-rastreador.vercel.app/api/location", {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -43,42 +47,67 @@ export default function MapScreen({ user }) {
           longitude: lng
         }),
       });
+      const resData = await response.json();
+      console.log("Ubicación enviada:", resData);
     } catch (e) {
-      console.log("Error enviando ubicación:", e);
+      console.log("Error de conexión al enviar ubicación:", e);
     }
+  };
+
+  const handleSignOut = async () => {
+    await SecureStore.deleteItemAsync('user_session');
+    onLogout();
   };
 
   return (
     <View style={styles.container}>
       <MapView
         style={styles.map}
+        showsUserLocation={true} // Muestra el punto azul nativo
         initialRegion={{
-          latitude: -12.162, // Coordenadas aproximadas de VMT
+          latitude: -12.162, // Centro en VMT, Lima
           longitude: -76.936,
-          latitudeDelta: 0.01,
-          longitudeDelta: 0.01,
+          latitudeDelta: 0.005,
+          longitudeDelta: 0.005,
         }}
       >
-        {/* Capa de OpenStreetMap */}
-        <UrlTile 
-          urlTemplate="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-          maximumZ={19}
-        />
-
         {location && (
           <Marker
             coordinate={location}
-            title={user.username}
-            description="Tú estás aquí"
-            pinColor="blue"
+            title={`Usuario: ${user.username}`}
+            description="Transmitiendo cada 1 metro"
+            pinColor="red"
           />
         )}
       </MapView>
+
+      {/* Botón Flotante para Cerrar Sesión */}
+      <TouchableOpacity style={styles.logoutButton} onPress={handleSignOut}>
+        <Text style={styles.logoutText}>Cerrar Sesión</Text>
+      </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  map: { width: Dimensions.get('window').width, height: Dimensions.get('window').height },
+  container: { 
+    flex: 1 
+  },
+  map: { 
+    width: Dimensions.get('window').width, 
+    height: Dimensions.get('window').height 
+  },
+  logoutButton: {
+    position: 'absolute',
+    top: 50,
+    right: 20,
+    backgroundColor: 'rgba(255, 0, 0, 0.7)',
+    padding: 10,
+    borderRadius: 8,
+    elevation: 5
+  },
+  logoutText: {
+    color: 'white',
+    fontWeight: 'bold'
+  }
 });

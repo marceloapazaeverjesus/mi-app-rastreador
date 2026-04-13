@@ -1,25 +1,24 @@
 import React, { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, StatusBar } from 'react-native';
 import LoginScreen from './screens/LoginScreen';
 import MapScreen from './screens/MapScreen';
 
 export default function App() {
   const [user, setUser] = useState(null);
 
-  // Si no hay usuario, mostramos el Login.
-  // Al loguearse, el componente LoginScreen llamará a setUser con los datos del usuario.
-  if (!user) {
-    return (
-      <View style={styles.container}>
-        <LoginScreen onLoginSuccess={(userData) => setUser(userData)} />
-      </View>
-    );
-  }
+  // Función para cerrar sesión (borra el estado del usuario)
+  const handleLogout = () => {
+    setUser(null);
+  };
 
-  // Si ya hay usuario, mostramos el Mapa.
   return (
     <View style={styles.container}>
-      <MapScreen user={user} />
+      <StatusBar barStyle="dark-content" />
+      {!user ? (
+        <LoginScreen onLoginSuccess={(userData) => setUser(userData)} />
+      ) : (
+        <MapScreen user={user} onLogout={handleLogout} />
+      )}
     </View>
   );
 }
