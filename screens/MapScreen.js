@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { StyleSheet, View, Dimensions, TouchableOpacity, Text, Alert } from 'react-native';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps'; 
 import * as Location from 'expo-location';
@@ -6,6 +6,7 @@ import * as SecureStore from 'expo-secure-store';
 
 export default function MapScreen({ user, onLogout }) {
   const [location, setLocation] = useState(null);
+  const mapRef = useRef(null); // Para controlar el mapa programáticamente
 
   useEffect(() => {
     startTracking();
@@ -23,15 +24,26 @@ export default function MapScreen({ user, onLogout }) {
     await Location.watchPositionAsync(
       {
         accuracy: Location.Accuracy.BestForNavigation,
-        distanceInterval: 1, // Actualiza cada 1 metro de movimiento
+        distanceInterval: 1, 
         timeInterval: 5000,  
       },
       (newLocation) => {
         const { latitude, longitude } = newLocation.coords;
-        setLocation(newLocation.coords);
+        const coords = { latitude, longitude };
+        
+        setLocation(coords);
         
         // 3. Enviar coordenadas a Vercel
         sendLocationToServer(latitude, longitude);
+
+        // Opcional: Centrar el mapa suavemente cuando te mueves
+        if (mapRef.current) {
+          mapRef.current.animateToRegion({
+            ...coords,
+            latitudeDelta: 0.005,
+            longitudeDelta: 0.005,
+          }, 1000);
+        }
       }
     );
   };
@@ -47,8 +59,7 @@ export default function MapScreen({ user, onLogout }) {
           longitude: lng
         }),
       });
-      const resData = await response.json();
-      console.log("Ubicación enviada:", resData);
+      console.log("Ubicación enviada correctamente");
     } catch (e) {
       console.log("Error de conexión al enviar ubicación:", e);
     }
@@ -62,10 +73,13 @@ export default function MapScreen({ user, onLogout }) {
   return (
     <View style={styles.container}>
       <MapView
+        ref={mapRef}
+        provider={PROVIDER_GOOGLE} // FUERZA EL USO DE GOOGLE MAPS
         style={styles.map}
-        showsUserLocation={true} // Muestra el punto azul nativo
+        showsUserLocation={true} 
+        followsUserLocation={true} // El mapa seguirá al punto azul
         initialRegion={{
-          latitude: -12.162, // Centro en VMT, Lima
+          latitude: -12.162, 
           longitude: -76.936,
           latitudeDelta: 0.005,
           longitudeDelta: 0.005,
@@ -101,13 +115,19 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 50,
     right: 20,
-    backgroundColor: 'rgba(255, 0, 0, 0.7)',
-    padding: 10,
-    borderRadius: 8,
-    elevation: 5
+    backgroundColor: 'rgba(215, 0, 0, 0.8)',
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 10,
+    elevation: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
   logoutText: {
     color: 'white',
-    fontWeight: 'bold'
+    fontWeight: 'bold',
+    fontSize: 14
   }
 });
