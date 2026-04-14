@@ -9,6 +9,8 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@vercel/postgres": "^0.10.0",
+    "bcryptjs": "^3.0.3",
     "expo": "~52.0.33",
     "expo-asset": "~11.0.5",
     "expo-constants": "~17.0.8",
