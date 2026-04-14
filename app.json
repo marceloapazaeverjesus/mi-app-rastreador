@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "mi-app-rastreo",
+    "name": "Famaz Rastreo",
     "slug": "mi-app-rastreo",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -21,8 +21,8 @@
           "fetch"
         ],
         "NSLocationWhenInUseUsageDescription": "Necesitamos tu ubicación para mostrarte en el mapa en tiempo real.",
-        "NSLocationAlwaysUsageDescription": "Necesitamos rastrear tu ubicación incluso con la app cerrada para seguridad familiar.",
-        "NSLocationAlwaysAndWhenInUseUsageDescription": "Tu ubicación se compartirá con tu grupo familiar en tiempo real."
+        "NSLocationAlwaysUsageDescription": "Necesitamos rastrear tu ubicación incluso con la app cerrada para seguridad.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "Tu ubicación se compartirá en tiempo real."
       }
     },
     "android": {
@@ -31,7 +31,6 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true,
       "permissions": [
         "ACCESS_COARSE_LOCATION",
         "ACCESS_FINE_LOCATION",
@@ -46,13 +45,18 @@
     },
     "plugins": [
       "expo-secure-store",
-      "expo-router",
       [
         "expo-location",
         {
           "locationAlwaysPermission": "Permitir que la app rastree tu ubicación siempre."
         }
-      ]
-    ]
+      ],
+      "expo-asset"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "8fb510ad-f243-43b5-a7fa-2f888b3da9c6"
+      }
+    }
   }
 }
